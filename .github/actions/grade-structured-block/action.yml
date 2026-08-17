@@ -1,0 +1,26 @@
+name: Grade structured exercise block
+description: Validate one learner artifact
+inputs:
+  step: {required: true}
+  body-file: {required: true}
+  labels: {required: false, default: ""}
+  issue-body-file: {required: false, default: ""}
+outputs:
+  passed: {value: "${{ steps.grade.outputs.passed }}"}
+  message: {value: "${{ steps.grade.outputs.message }}"}
+runs:
+  using: composite
+  steps:
+    - id: grade
+      shell: bash
+      env:
+        STEP: "${{ inputs.step }}"
+        BODY_FILE: "${{ inputs.body-file }}"
+        LABELS: "${{ inputs.labels }}"
+        ISSUE_BODY_FILE: "${{ inputs.issue-body-file }}"
+      run: |
+        set +e
+        message=$(python3 "$GITHUB_ACTION_PATH/grade.py" --step "$STEP" --body-file "$BODY_FILE" --labels "$LABELS" --issue-body-file "$ISSUE_BODY_FILE")
+        status=$?
+        echo "passed=$([[ $status -eq 0 ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+        echo "message=$message" >> "$GITHUB_OUTPUT"
