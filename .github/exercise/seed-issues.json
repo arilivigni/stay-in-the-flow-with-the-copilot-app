@@ -1,0 +1,4 @@
+[
+ {"title":"Seed: Signup confirmation intermittently fails","body":"Synthetic report: New users sometimes receive no confirmation after signup. This blocks onboarding for affected users and reproduces in the launch environment."},
+ {"title":"Seed: Clarify the welcome checklist","body":"Synthetic report: The welcome checklist does not explain when workspace setup is complete. Users can continue, but several ask for clarification."}
+]
