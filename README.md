@@ -46,20 +46,6 @@ If the exercise isn't ready in 20 seconds, check the [Actions](../../actions) ta
 
 </details>
 
-## Retry or reset
-
-Edit the same marked learner comment after feedback. Corrected comments and labels are graded automatically. For a complete reset, create a fresh repository from the template.
-
-## Responsible use
-
-Only post sanitized planning criteria. Never paste credentials, private paths, customer information, restricted links, or raw content from Teams, Outlook, meetings, or Microsoft 365 documents.
-
-## Maintainer validation
-
-Step workflows reuse `skills/exercise-toolkit` (`start-exercise`, `find-exercise-issue`, `finish-exercise`) plus the shared step-feedback templates, and delegate answer checks to the `grade-structured-block` action.
-
-Run `python3 .github/actions/grade-structured-block/grade.py --self-test`. In a fresh template copy, confirm setup starts automatically, an untouched answer fails with actionable feedback in the shared results table, and a valid answer advances exactly once.
-
 ---
 
 &copy; 2026 GitHub &bull; [Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/code_of_conduct.md) &bull; [MIT License](https://gh.io/mit)
