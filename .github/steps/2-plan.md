@@ -2,7 +2,7 @@
 
 1. In Plan Mode, design a daily review of newly opened issues in this repository.
 2. Require a summary, priority and topic-label recommendations, and rationale.
-3. Prohibit automatic labeling, closing, assignment, and publication of Work IQ source content.
+3. Treat Microsoft 365 context as read-only input. Prohibit automatic labeling, closing, assignment, and publication of Work IQ source content.
 4. Post the approved summary here.
 
 ```text

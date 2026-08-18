@@ -5,9 +5,9 @@ Build a supervised daily issue-triage automation without writing code.
 ## Welcome
 
 - **Who this is for:** Product managers, scrum masters, program managers, content managers, and other GitHub collaborators.
-- **What you'll learn:** Use Work IQ, Plan Mode, Canvas, local automations, and session history while keeping a human approval boundary.
+- **What you'll learn:** Use Work IQ with Microsoft 365 sources, Plan Mode, Canvas, Automations, and session history while keeping MCP access and repository changes behind clear human boundaries.
 - **What you'll build:** A daily assistant that summarizes new issues and recommends priorities and labels for review.
-- **Prerequisites:** Access to the GitHub Copilot app, Work IQ, local automations, and permission to comment on and label issues in the copied repository.
+- **Prerequisites:** Access to the GitHub Copilot app, Work IQ, Automations, and permission to comment on and label issues in the copied repository. Work IQ requires Microsoft 365 tenant consent; a synthetic fallback is included if access is unavailable.
 - **How long:** About 45 minutes.
 
 > [!IMPORTANT]
@@ -27,7 +27,7 @@ Edit the same marked learner comment after feedback. Corrected comments and labe
 
 ## Responsible use
 
-Only post sanitized planning criteria. Never paste credentials, private paths, customer information, restricted links, or raw workplace messages.
+Only post sanitized planning criteria. Never paste credentials, private paths, customer information, restricted links, or raw content from Teams, Outlook, meetings, or Microsoft 365 documents.
 
 ## Maintainer validation
 
