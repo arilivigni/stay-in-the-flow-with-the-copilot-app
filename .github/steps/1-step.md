@@ -1,5 +1,13 @@
 ## Step 1: Establish safe triage context
 
+Every safe automation starts with a clear data boundary. You will reduce workplace context to a source type and sanitized planning signal before anything reaches GitHub.
+
+### 📖 Theory: minimize context before automation
+
+Work IQ can provide useful planning context, but an issue tracker is not the place for raw workplace content. Keep only what the triage decision needs, and use the synthetic fallback when access is unavailable.
+
+### ⌨️ Activity: establish safe triage context
+
 1. In Work IQ, choose one Microsoft 365 source: a Teams conversation, Outlook email thread, meeting, or planning document.
 2. Ask: `Find one recent planning signal about the onboarding launch. Return only a one-sentence summary and the source type. Do not quote people, include names, or return links.`
 3. Remove names, identifiers, private quotations, restricted links, customer details, and unsupported claims.

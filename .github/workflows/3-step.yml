@@ -1,4 +1,4 @@
-name: Step 1
+name: Step 3
 on:
   issue_comment:
     types: [created, edited]
@@ -7,7 +7,7 @@ permissions:
   actions: write
   issues: write
 concurrency:
-  group: step-1-${{ github.repository }}
+  group: step-3-${{ github.repository }}
   cancel-in-progress: false
 jobs:
   find_exercise:
@@ -35,7 +35,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          active=$(gh issue view '${{ needs.find_exercise.outputs.issue-number }}' --repo '${{ github.repository }}' --json labels --jq '[.labels[].name] | contains(["step-1"])')
+          active=$(gh issue view '${{ needs.find_exercise.outputs.issue-number }}' --repo '${{ github.repository }}' --json labels --jq '[.labels[].name] | contains(["step-3"])')
           echo "active=$active" >> "$GITHUB_OUTPUT"
       - id: comment
         if: steps.guard.outputs.active == 'true'
@@ -43,20 +43,29 @@ jobs:
         with:
           repository: ${{ github.repository }}
           issue-number: ${{ needs.find_exercise.outputs.issue-number }}
-          marker: step-1-context
+          marker: step-3-rubric
           output-file: ${{ runner.temp }}/learner.md
+      - if: steps.guard.outputs.active == 'true' && steps.comment.outputs.found != 'true'
+        uses: ./.github/actions/post-feedback
+        with:
+          repository: ${{ github.repository }}
+          issue-number: ${{ needs.find_exercise.outputs.issue-number }}
+          step: 3
+          message: "Add the `step-3-rubric` start and end markers to one comment, then retry."
+      - if: steps.guard.outputs.active == 'true' && steps.comment.outputs.found != 'true'
+        run: exit 1
       - id: grade
         if: steps.comment.outputs.found == 'true'
         uses: ./.github/actions/grade-structured-block
         with:
-          step: 1
+          step: 3
           body-file: ${{ runner.temp }}/learner.md
       - if: steps.comment.outputs.found == 'true'
         uses: ./.github/actions/post-feedback
         with:
           repository: ${{ github.repository }}
           issue-number: ${{ needs.find_exercise.outputs.issue-number }}
-          step: 1
+          step: 3
           message: ${{ steps.grade.outputs.message }}
       - if: steps.comment.outputs.found == 'true' && steps.grade.outputs.passed != 'true'
         run: exit 1
@@ -72,8 +81,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           labels=$(gh issue view '${{ needs.find_exercise.outputs.issue-number }}' --repo '${{ github.repository }}' --json labels --jq '[.labels[].name]')
-          jq -e 'contains(["step-1"])' <<<"$labels" >/dev/null || exit 0
-          gh issue comment '${{ needs.find_exercise.outputs.issue-number }}' --repo '${{ github.repository }}' --body-file '.github/steps/2-plan.md' >/dev/null
-          gh issue edit '${{ needs.find_exercise.outputs.issue-number }}' --repo '${{ github.repository }}' --remove-label 'step-1' --add-label 'step-2' >/dev/null
+          jq -e 'contains(["step-3"])' <<<"$labels" >/dev/null || exit 0
+          gh issue comment '${{ needs.find_exercise.outputs.issue-number }}' --repo '${{ github.repository }}' --body-file '.github/steps/4-step.md' >/dev/null
+          gh issue edit '${{ needs.find_exercise.outputs.issue-number }}' --repo '${{ github.repository }}' --remove-label 'step-3' --add-label 'step-4' >/dev/null
           gh workflow disable '${{ github.workflow }}'
-          gh workflow enable 'Step 2'
+          gh workflow enable 'Step 4'
