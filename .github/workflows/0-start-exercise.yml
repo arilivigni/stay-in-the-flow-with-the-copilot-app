@@ -21,62 +21,78 @@ jobs:
     name: Start Exercise
     uses: skills/exercise-toolkit/.github/workflows/start-exercise.yml@v0.9.3
     with:
-      exercise-title: "Build your daily triage assistant"
-      intro-message: "Create a supervised daily triage workflow while keeping every repository change under human review."
+      exercise-title: "Stay in the Flow with the Copilot App"
+      intro-message: "Build a supervised daily triage assistant that recommends priorities and labels while every repository change stays under human review. Let's go 🚀"
 
-  post_next_step_content:
-    name: Post next step content
+  seed_exercise_content:
+    name: Seed labels and issues
     runs-on: ubuntu-latest
     needs: [start_exercise]
     env:
       ISSUE_NUMBER: ${{ needs.start_exercise.outputs.issue-number }}
       ISSUE_REPOSITORY: ${{ github.repository }}
-
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@v6
         with:
           ref: main
 
-      - name: Create labels and synthetic issues
+      - name: Create priority and topic labels
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          for spec in 'exercise:8250df' 'exercise-seed:bf8700' 'exercise-completion:1f883d' 'step-1:0969da' 'step-2:0969da' 'step-3:0969da' 'step-4:0969da' 'step-5:0969da' 'step-6:0969da' 'completed:1f883d' 'P1:b60205' 'P2:fbca04' 'P3:0e8a16' 'onboarding:5319e7' 'reliability:d4c5f9' 'documentation:0075ca' 'question:d876e3'; do
+          for spec in 'P1:b60205' 'P2:fbca04' 'P3:0e8a16' 'onboarding:5319e7' 'reliability:d4c5f9' 'documentation:0075ca' 'question:d876e3'; do
             gh label create "${spec%%:*}" --repo "$ISSUE_REPOSITORY" --color "${spec##*:}" --force >/dev/null
           done
 
-          gh issue edit "$ISSUE_NUMBER" --repo "$ISSUE_REPOSITORY" --add-label exercise --add-label step-1 >/dev/null
-
+      - name: Create seeded triage issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
           while IFS= read -r item; do
             title=$(jq -r .title <<<"$item")
             body=$(jq -r .body <<<"$item")
             found=$(gh issue list --repo "$ISSUE_REPOSITORY" --state all --search "\"$title\" in:title" --json title --jq ".[] | select(.title == \"$title\") | .title" | head -1)
-            [[ -n "$found" ]] || gh issue create --repo "$ISSUE_REPOSITORY" --title "$title" --body "$body" --label exercise-seed >/dev/null
+            [[ -n "$found" ]] || gh issue create --repo "$ISSUE_REPOSITORY" --title "$title" --body "$body" >/dev/null
           done < <(jq -c '.[]' .github/exercise/seed-issues.json)
 
-          complete=$(gh issue list --repo "$ISSUE_REPOSITORY" --state all --search '"Exercise complete: Daily triage assistant" in:title' --json title --jq '.[] | select(.title == "Exercise complete: Daily triage assistant") | .title' | head -1)
-          [[ -n "$complete" ]] || gh issue create --repo "$ISSUE_REPOSITORY" --title 'Exercise complete: Daily triage assistant' --body 'Complete Step 5 to unlock the final activity.' --label exercise-completion >/dev/null
+  post_next_step_content:
+    name: Post next step content
+    runs-on: ubuntu-latest
+    needs: [start_exercise, seed_exercise_content]
+    env:
+      ISSUE_NUMBER: ${{ needs.start_exercise.outputs.issue-number }}
+      ISSUE_REPOSITORY: ${{ github.repository }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: main
 
-      - name: Create comment - add welcome and step content
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          existing=$(gh api --paginate "repos/$ISSUE_REPOSITORY/issues/$ISSUE_NUMBER/comments?per_page=100" | jq -s '[add[] | select(.body | contains("<!-- step-1-context:start -->"))] | length')
-          if [[ "$existing" == "0" ]]; then
-            gh issue comment "$ISSUE_NUMBER" --repo "$ISSUE_REPOSITORY" --body-file "$STEP_1_FILE" >/dev/null
-          fi
+      - name: Get response templates
+        uses: actions/checkout@v6
+        with:
+          repository: skills/exercise-toolkit
+          path: exercise-toolkit
+          ref: v0.9.3
 
-      - name: Create comment - watching for progress
-        uses: ./.github/actions/post-feedback
+      - name: Create comment - add step content
+        uses: GrantBirki/comment@v2.1.1
         with:
           repository: ${{ env.ISSUE_REPOSITORY }}
           issue-number: ${{ env.ISSUE_NUMBER }}
-          step: 1
-          message: "Watching for your marked Step 1 comment."
+          file: ${{ env.STEP_1_FILE }}
+
+      - name: Create comment - watching for progress
+        uses: GrantBirki/comment@v2.1.1
+        with:
+          repository: ${{ env.ISSUE_REPOSITORY }}
+          issue-number: ${{ env.ISSUE_NUMBER }}
+          file: exercise-toolkit/markdown-templates/step-feedback/watching-for-progress.md
 
       - name: Enable next step workflow
+        run: gh workflow enable "Step 1"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow enable "Step 1"

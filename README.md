@@ -56,7 +56,9 @@ Only post sanitized planning criteria. Never paste credentials, private paths, c
 
 ## Maintainer validation
 
-Run `python3 .github/actions/grade-structured-block/grade.py --self-test`. In a fresh template copy, confirm setup starts automatically, an untouched answer fails with actionable feedback, and a valid answer advances exactly once.
+Step workflows reuse `skills/exercise-toolkit` (`start-exercise`, `find-exercise-issue`, `finish-exercise`) plus the shared step-feedback templates, and delegate answer checks to the `grade-structured-block` action.
+
+Run `python3 .github/actions/grade-structured-block/grade.py --self-test`. In a fresh template copy, confirm setup starts automatically, an untouched answer fails with actionable feedback in the shared results table, and a valid answer advances exactly once.
 
 ---
 
