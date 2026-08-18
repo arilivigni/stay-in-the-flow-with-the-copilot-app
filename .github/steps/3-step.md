@@ -1,5 +1,11 @@
 ## Step 3: Build the triage rubric in Canvas
 
+### 📖 Theory: make recommendations explainable
+
+A small, explicit rubric gives the reviewer a repeatable way to compare urgency, impact, and evidence instead of accepting an unexplained model judgment.
+
+### ⌨️ Activity: build and test the rubric
+
 1. Use `/create-canvas` to make a rubric with `Priority`, `Use when`, `Allowed labels`, and `Human check`.
 2. Define distinct P1, P2, and P3 conditions. Use only the supplied topic labels.
 3. Test it against a seeded issue, revise ambiguity, and post this summary here.

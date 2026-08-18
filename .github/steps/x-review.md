@@ -1,4 +1,4 @@
-## Exercise complete
+## Review
 
 You used Work IQ with a Microsoft 365 source, kept MCP-delivered context sanitized, created a supervised plan and Canvas rubric, configured a recommendation-only Automation, and made a human-approved triage decision.
 

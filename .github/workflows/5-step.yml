@@ -1,13 +1,15 @@
-name: Step 6
+name: Step 5
 on:
   issue_comment:
     types: [created, edited]
+  issues:
+    types: [labeled, unlabeled]
 permissions:
   contents: read
   actions: write
   issues: write
 concurrency:
-  group: step-6-${{ github.repository }}
+  group: step-5-${{ github.repository }}
   cancel-in-progress: false
 jobs:
   find_exercise:
@@ -21,12 +23,12 @@ jobs:
         env: {GH_TOKEN: "${{ github.token }}"}
         run: |
           number=$(gh issue list --repo '${{ github.repository }}' --state open --search '"Exercise: Build your daily triage assistant" in:title' --json number,title --jq '.[] | select(.title == "Exercise: Build your daily triage assistant") | .number' | head -1)
-          active=$(gh issue view "$number" --repo '${{ github.repository }}' --json labels --jq '[.labels[].name] | contains(["step-6"])')
+          active=$(gh issue view "$number" --repo '${{ github.repository }}' --json labels --jq '[.labels[].name] | contains(["step-5"])')
           echo "number=$number" >> "$GITHUB_OUTPUT"; echo "active=$active" >> "$GITHUB_OUTPUT"
   check_step_work:
     name: Check step work
     needs: [find_exercise]
-    if: "${{ needs.find_exercise.outputs.active == 'true' && github.event.issue.title == 'Exercise complete: Daily triage assistant' }}"
+    if: needs.find_exercise.outputs.active == 'true' && startsWith(github.event.issue.title, 'Seed:')
     runs-on: ubuntu-latest
     outputs:
       passed: ${{ steps.grade.outputs.passed }}
@@ -37,25 +39,42 @@ jobs:
         with:
           repository: ${{ github.repository }}
           issue-number: ${{ github.event.issue.number }}
-          marker: step-6-summary
+          marker: step-5-approval
           output-file: ${{ runner.temp }}/learner.md
+      - if: steps.comment.outputs.found != 'true'
+        uses: ./.github/actions/post-feedback
+        with:
+          repository: ${{ github.repository }}
+          issue-number: ${{ needs.find_exercise.outputs.issue-number }}
+          step: 5
+          message: "Add the `step-5-approval` start and end markers to one comment on the seeded issue, then retry."
+      - if: steps.comment.outputs.found != 'true'
+        run: exit 1
+      - id: issue
+        env: {GH_TOKEN: "${{ github.token }}"}
+        run: |
+          gh api 'repos/${{ github.repository }}/issues/${{ github.event.issue.number }}' --jq .body > '${{ runner.temp }}/issue.md'
+          labels=$(gh api 'repos/${{ github.repository }}/issues/${{ github.event.issue.number }}' --jq '[.labels[].name] | join(" ")')
+          echo "labels=$labels" >> "$GITHUB_OUTPUT"
       - id: grade
         if: steps.comment.outputs.found == 'true'
         uses: ./.github/actions/grade-structured-block
         with:
-          step: 6
+          step: 5
           body-file: ${{ runner.temp }}/learner.md
+          labels: ${{ steps.issue.outputs.labels }}
+          issue-body-file: ${{ runner.temp }}/issue.md
       - if: steps.comment.outputs.found == 'true'
         uses: ./.github/actions/post-feedback
         with:
           repository: ${{ github.repository }}
-          issue-number: ${{ github.event.issue.number }}
-          step: 6
+          issue-number: ${{ needs.find_exercise.outputs.issue-number }}
+          step: 5
           message: ${{ steps.grade.outputs.message }}
       - if: steps.comment.outputs.found == 'true' && steps.grade.outputs.passed != 'true'
         run: exit 1
   post_next_step_content:
-    name: Post completion content
+    name: Post next step content
     needs: [find_exercise, check_step_work]
     if: needs.check_step_work.outputs.passed == 'true'
     runs-on: ubuntu-latest
@@ -63,10 +82,10 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - env: {GH_TOKEN: "${{ github.token }}"}
         run: |
+          completion=$(gh issue list --repo '${{ github.repository }}' --state open --search '"Exercise complete: Daily triage assistant" in:title' --json number,title --jq '.[] | select(.title == "Exercise complete: Daily triage assistant") | .number' | head -1)
           labels=$(gh issue view '${{ needs.find_exercise.outputs.issue-number }}' --repo '${{ github.repository }}' --json labels --jq '[.labels[].name]')
-          jq -e 'contains(["step-6"])' <<<"$labels" >/dev/null || exit 0
-          gh issue comment '${{ github.event.issue.number }}' --repo '${{ github.repository }}' --body-file .github/steps/finish.md >/dev/null
-          gh issue edit '${{ github.event.issue.number }}' --repo '${{ github.repository }}' --add-label completed >/dev/null
-          gh issue close '${{ github.event.issue.number }}' --repo '${{ github.repository }}' >/dev/null
-          gh issue edit '${{ needs.find_exercise.outputs.issue-number }}' --repo '${{ github.repository }}' --remove-label step-6 --add-label completed >/dev/null
+          jq -e 'contains(["step-5"])' <<<"$labels" >/dev/null || exit 0
+          gh issue comment "$completion" --repo '${{ github.repository }}' --body-file .github/steps/6-step.md >/dev/null
+          gh issue edit '${{ needs.find_exercise.outputs.issue-number }}' --repo '${{ github.repository }}' --remove-label step-5 --add-label step-6 >/dev/null
           gh workflow disable '${{ github.workflow }}'
+          gh workflow enable 'Step 6'

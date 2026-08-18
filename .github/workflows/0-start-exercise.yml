@@ -2,10 +2,9 @@ name: Step 0 # Start Exercise
 
 on:
   workflow_dispatch:
-  # NOTE: Make sure the repository is a template before enabling this trigger.
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -13,14 +12,14 @@ permissions:
   issues: write
 
 env:
-  STEP_1_FILE: ".github/steps/1-context.md"
+  STEP_1_FILE: ".github/steps/1-step.md"
 
 jobs:
   start_exercise:
     if: |
       !github.event.repository.is_template
     name: Start Exercise
-    uses: skills/exercise-toolkit/.github/workflows/start-exercise.yml@v0.9.1
+    uses: skills/exercise-toolkit/.github/workflows/start-exercise.yml@v0.9.3
     with:
       exercise-title: "Build your daily triage assistant"
       intro-message: "Create a supervised daily triage workflow while keeping every repository change under human review."
@@ -66,8 +65,7 @@ jobs:
         run: |
           existing=$(gh api --paginate "repos/$ISSUE_REPOSITORY/issues/$ISSUE_NUMBER/comments?per_page=100" | jq -s '[add[] | select(.body | contains("<!-- step-1-context:start -->"))] | length')
           if [[ "$existing" == "0" ]]; then
-            cat .github/steps/0-welcome.md "$STEP_1_FILE" > "$RUNNER_TEMP/step-1.md"
-            gh issue comment "$ISSUE_NUMBER" --repo "$ISSUE_REPOSITORY" --body-file "$RUNNER_TEMP/step-1.md" >/dev/null
+            gh issue comment "$ISSUE_NUMBER" --repo "$ISSUE_REPOSITORY" --body-file "$STEP_1_FILE" >/dev/null
           fi
 
       - name: Create comment - watching for progress
